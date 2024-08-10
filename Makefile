@@ -7,3 +7,6 @@ flake:
 compose:
 	@docker compose build
 	@docker compose up 
+
+freeze:
+	@pip freeze >> requirements.txt
