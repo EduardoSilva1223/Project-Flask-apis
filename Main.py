@@ -4,6 +4,7 @@
 from flask import Flask, jsonify
 from flask_restful import Resource, Api, reqparse
 from flask_mongoengine import MongoEngine
+import re
 
 
 # definindo variaveis globais
@@ -47,6 +48,7 @@ _user_parser.add_argument('birth_date',
                           help="o Nome não pode ser vazio"
                           )
 
+
 class UserModel(db.Document):
     cpf = db.StringField(required=True, unique=True)
     email = db.EmailField(required=True)
@@ -61,9 +63,41 @@ class Users(Resource):   # Definindo classes da api.
 
 
 class User(Resource):
+    def validate_cpf(self, cpf):
+
+        # Has the correct mask?
+        if not re.match(r'\d{3}\.\d{3}\.\d{3}-\d{2}', cpf):
+            return False
+
+        # Grab only numbers
+        numbers = [int(digit) for digit in cpf if digit.isdigit()]
+
+        # Does it have 11 digits?
+        if len(numbers) != 11 or len(set(numbers)) == 1:
+            return False
+
+        # Validate first digit after -
+        sum_of_products = sum(a*b for a, b in zip(numbers[0:9],
+                                                  range(10, 1, -1)))
+        expected_digit = (sum_of_products * 10 % 11) % 10
+        if numbers[9] != expected_digit:
+            return False
+
+        # Validate second digit after -
+        sum_of_products = sum(a*b for a, b in zip(numbers[0:10],
+                                                  range(11, 1, -1)))
+        expected_digit = (sum_of_products * 10 % 11) % 10
+        if numbers[10] != expected_digit:
+            return False
+
+        return True
+
     def post(self):
         data = _user_parser.parse_args()
-        UserModel(**data).save()
+        if not self.validate_cpf(data["cpf"]):
+            return {"message": "CPF Is Invalid"}
+        response = UserModel(**data).save()
+        return {"message": "usuario %s foi incluso  no banco" % response.id}
 
     def get(self, cpf):
         return {"message": "CPF"}
