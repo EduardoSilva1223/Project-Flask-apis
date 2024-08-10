@@ -4,6 +4,7 @@
 from flask import Flask, jsonify
 from flask_restful import Resource, Api, reqparse
 from flask_mongoengine import MongoEngine
+from mongoengine import NotUniqueError
 import re
 
 
@@ -63,14 +64,14 @@ class Users(Resource):   # Definindo classes da api.
 
 
 class User(Resource):
-    def validate_cpf(self, cpf):
+    def validate_cpf(self, cpf): # algoritimo de CPF 
 
         # Has the correct mask?
         if not re.match(r'\d{3}\.\d{3}\.\d{3}-\d{2}', cpf):
             return False
 
         # Grab only numbers
-        numbers = [int(digit) for digit in cpf if digit.isdigit()]
+        numbers = [int(digit) for digit in cpf if digit.isdigit()] 
 
         # Does it have 11 digits?
         if len(numbers) != 11 or len(set(numbers)) == 1:
@@ -96,8 +97,11 @@ class User(Resource):
         data = _user_parser.parse_args()
         if not self.validate_cpf(data["cpf"]):
             return {"message": "CPF Is Invalid"}
-        response = UserModel(**data).save()
-        return {"message": "usuario %s foi incluso  no banco" % response.id}
+        try:
+                response = UserModel(**data).save()
+                return {"message": "usuario %s foi incluso  no banco" % response.id}
+        except NotUniqueError:
+            return {"message": "CPF alredy exists in mongo"}, 400
 
     def get(self, cpf):
         return {"message": "CPF"}
