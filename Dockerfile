@@ -5,9 +5,11 @@ WORKDIR /app
 
 COPY requirements.txt /app
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
-COPY Main.py .
+COPY wsgi.py .
+COPY config.py . 
+COPY application application
 
 
-CMD [ "python", "Main.py" ]
+CMD [ "python", "wsgi.py" ]
