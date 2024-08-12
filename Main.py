@@ -104,7 +104,11 @@ class User(Resource):
             return {"message": "CPF alredy exists in mongo"}, 400
 
     def get(self, cpf):
-        return {"message": "CPF"}
+        response = UserModel.objects(cpf=cpf)
+
+        if response:
+                return jsonify(response)
+        return {"message": "CPF nao existe na base"}, 404
 
 
 api.add_resource(Users, '/users')
