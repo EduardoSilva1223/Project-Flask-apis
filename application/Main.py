@@ -1,27 +1,13 @@
 ###
 # importando bibliotecas
 ###
-from flask import Flask, jsonify
-from flask_restful import Resource, Api, reqparse
-from flask_mongoengine import MongoEngine
+from flask import jsonify
+from flask_restful import Resource, reqparse
 from mongoengine import NotUniqueError
+from .model import UserModel
 import re
 
 
-# definindo variaveis globais
-
-app = Flask(__name__)
-
-app.config['MONGODB_SETTINGS'] = {
-    'db': 'users',
-    'host': 'mongodb',
-    'port': 27017,
-    'username': 'admin',
-    'password': 'admin'
-}
-# Variaveis Globais
-api = Api(app)
-db = MongoEngine(app)
 _user_parser = reqparse.RequestParser()
 _user_parser.add_argument('first_name',
                           type=str,
@@ -50,28 +36,20 @@ _user_parser.add_argument('birth_date',
                           )
 
 
-class UserModel(db.Document):
-    cpf = db.StringField(required=True, unique=True)
-    email = db.EmailField(required=True)
-    first_name = db.StringField(required=True)
-    last_name = db.StringField(required=True)
-    birth_date = db.DateTimeField(requiered=True)
-
-
 class Users(Resource):   # Definindo classes da api.
     def get(self):
         return jsonify(UserModel.objects())
 
 
 class User(Resource):
-    def validate_cpf(self, cpf): # algoritimo de CPF 
+    def validate_cpf(self, cpf):  # Algoritimo de CPF
 
         # Has the correct mask?
         if not re.match(r'\d{3}\.\d{3}\.\d{3}-\d{2}', cpf):
             return False
 
         # Grab only numbers
-        numbers = [int(digit) for digit in cpf if digit.isdigit()] 
+        numbers = [int(digit) for digit in cpf if digit.isdigit()]
 
         # Does it have 11 digits?
         if len(numbers) != 11 or len(set(numbers)) == 1:
@@ -98,8 +76,8 @@ class User(Resource):
         if not self.validate_cpf(data["cpf"]):
             return {"message": "CPF Is Invalid"}
         try:
-                response = UserModel(**data).save()
-                return {"message": "usuario %s foi incluso  no banco" % response.id}
+            response = UserModel(**data).save()
+            return {"message": "user %s  included" % response.id}
         except NotUniqueError:
             return {"message": "CPF alredy exists in mongo"}, 400
 
@@ -107,12 +85,5 @@ class User(Resource):
         response = UserModel.objects(cpf=cpf)
 
         if response:
-                return jsonify(response)
+            return jsonify(response)
         return {"message": "CPF nao existe na base"}, 404
-
-
-api.add_resource(Users, '/users')
-api.add_resource(User, '/user', '/user/<string:cpf>')
-
-if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0')
