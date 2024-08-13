@@ -86,4 +86,4 @@ class User(Resource):
 
         if response:
             return jsonify(response)
-        return {"message": "CPF nao existe na base"}, 404
+        return {"message": "CPF not exists in the base"}, 400
