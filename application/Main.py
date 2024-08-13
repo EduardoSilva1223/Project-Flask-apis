@@ -74,12 +74,12 @@ class User(Resource):
     def post(self):
         data = _user_parser.parse_args()
         if not self.validate_cpf(data["cpf"]):
-            return {"message": "CPF Is Invalid"}
+            return {"message": "CPF is invalid"}, 400
         try:
             response = UserModel(**data).save()
             return {"message": "user %s  included" % response.id}
         except NotUniqueError:
-            return {"message": "CPF alredy exists in mongo"}, 400
+            return {"message": "CPF alredy exists in mongo"}, 404
 
     def get(self, cpf):
         response = UserModel.objects(cpf=cpf)
