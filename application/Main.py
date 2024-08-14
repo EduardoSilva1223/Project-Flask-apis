@@ -79,7 +79,7 @@ class User(Resource):
             response = UserModel(**data).save()
             return {"message": "user %s  included" % response.id}
         except NotUniqueError:
-            return {"message": "CPF alredy exists in mongo"}, 404
+            return {"message": "CPF alredy exists in mongo"}, 401
 
     def get(self, cpf):
         response = UserModel.objects(cpf=cpf)
