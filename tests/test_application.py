@@ -43,7 +43,7 @@ class TestApplication():
         assert b"invalid" in response.data
 
         response = client.post("/user", json=valid_user)
-        assert response.status_code == 404
+        assert response.status_code == 401
         assert b"exists" in response.data
 
     def test_get_user(self, client, valid_user, invalid_user):
