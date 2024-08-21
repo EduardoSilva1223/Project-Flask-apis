@@ -11,3 +11,7 @@ compose:
 
 freeze:
 	@pip freeze >> requirements.txt
+
+railway:
+	@railway link -p ab7747a8-1fe6-4a3c-bd0c-cdb74998818f
+	@railway up
