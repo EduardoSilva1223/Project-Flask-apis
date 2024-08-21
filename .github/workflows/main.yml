@@ -11,7 +11,7 @@ jobs:
 
 
     steps:
-      - uses: action/checkout@v3
+      - uses: action/checkout@v4
 
       - name: install depedencies
         run: |
