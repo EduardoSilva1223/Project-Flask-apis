@@ -1,0 +1,23 @@
+name: Deploy Railway
+
+on:
+  push:
+    branches: [ main ] 
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+
+    steps:
+      - uses: action/checkout@v3
+
+      - name: install depedencies
+        run: |
+          pip install -r requirements.txt
+          pip install flake 8 pytest 
+
+      - name: Run tests
+        run: make compose
+      
