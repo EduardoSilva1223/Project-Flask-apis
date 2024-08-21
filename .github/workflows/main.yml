@@ -19,5 +19,5 @@ jobs:
           pip install flake8 pytest 
 
       - name: Run tests
-        run: make compose
+        run: make railway
       
