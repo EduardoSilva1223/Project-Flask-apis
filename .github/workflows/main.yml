@@ -16,7 +16,7 @@ jobs:
       - name: install depedencies
         run: |
           pip install -r requirements.txt
-          pip install flake 8 pytest 
+          pip install flake8 pytest 
 
       - name: Run tests
         run: make compose
